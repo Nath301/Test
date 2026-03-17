@@ -1175,46 +1175,7 @@
 
 <body>
 
-  <!-- ═══ CONFIG MODAL ═══ -->
-  <div class="overlay" id="config-modal">
-    <div class="modal">
-      <div class="modal-brand"><span class="logo-l">L</span><span class="logo-rest">ettrd</span></div>
-      <h2>Connecter Supabase</h2>
-      <p>Entrez vos clés depuis <strong>supabase.com → Settings → API</strong>. Puis exécutez ce SQL dans l'éditeur SQL
-        de votre projet :</p>
-      <div class="sql-block">-- 1. Table newsletters
-        CREATE TABLE newsletters (
-        id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-        user_id uuid REFERENCES auth.users NOT NULL,
-        title text NOT NULL,
-        content text DEFAULT '',
-        status text DEFAULT 'draft',
-        scheduled_at timestamptz,
-        sent_at timestamptz,
-        created_at timestamptz DEFAULT now()
-        );
-        ALTER TABLE newsletters ENABLE ROW LEVEL SECURITY;
-        CREATE POLICY "own newsletters" ON newsletters FOR ALL USING (auth.uid() = user_id);
-
-        -- 2. Table subscribers
-        CREATE TABLE subscribers (
-        id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-        user_id uuid REFERENCES auth.users NOT NULL,
-        email text NOT NULL,
-        name text,
-        source text DEFAULT 'manual',
-        active boolean DEFAULT true,
-        created_at timestamptz DEFAULT now()
-        );
-        ALTER TABLE subscribers ENABLE ROW LEVEL SECURITY;
-        CREATE POLICY "own subscribers" ON subscribers FOR ALL USING (auth.uid() = user_id);</div>
-      <div class="form-group"><label>Supabase URL</label><input type="text" id="cfg-url"
-          placeholder="https://xxxx.supabase.co" /></div>
-      <div class="form-group"><label>Anon Key</label><input type="text" id="cfg-key" placeholder="eyJhbGci..." /></div>
-      <button class="btn btn-primary btn-full" onclick="saveConfig()">Lancer Lettrd →</button>
-      <div class="msg" id="cfg-msg"></div>
-    </div>
-  </div>
+  
 
   <!-- ═══ AUTH PAGE ═══ -->
   <div class="page" id="auth-page">
