@@ -1,944 +1,1767 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Lettrd — Newsletters collaboratives</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#faf8f4;
-  --surface:#ffffff;
-  --card:#f4f1ec;
-  --border:#e8e3db;
-  --ink:#1a1714;
-  --ink2:#4a453f;
-  --muted:#9a9089;
-  --accent:#d4541a;
-  --accent-light:#fdf0e8;
-  --accent2:#2563a8;
-  --success:#1a8c4e;
-  --radius:10px;
-  --font-serif:'Playfair Display',serif;
-  --font-sans:'Cabinet Grotesk',sans-serif;
-  --shadow:0 2px 16px rgba(26,23,20,.08);
-  --shadow-lg:0 8px 40px rgba(26,23,20,.12);
-}
-html,body{height:100%;scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);min-height:100vh;}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lettrd — Newsletters collaboratives</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* ── TEXTURE ── */
-body::after{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:9999;
-}
+    :root {
+      --bg: #faf8f4;
+      --surface: #ffffff;
+      --card: #f4f1ec;
+      --border: #e8e3db;
+      --ink: #1a1714;
+      --ink2: #4a453f;
+      --muted: #9a9089;
+      --accent: #d4541a;
+      --accent-light: #fdf0e8;
+      --accent2: #2563a8;
+      --success: #1a8c4e;
+      --radius: 10px;
+      --font-serif: 'Playfair Display', serif;
+      --font-sans: 'Cabinet Grotesk', sans-serif;
+      --shadow: 0 2px 16px rgba(26, 23, 20, .08);
+      --shadow-lg: 0 8px 40px rgba(26, 23, 20, .12);
+    }
 
-/* ════════════════════════════
+    html,
+    body {
+      height: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+    }
+
+    /* ── TEXTURE ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ════════════════════════════
    PAGES
 ════════════════════════════ */
-.page{display:none;min-height:100vh;}
-.page.active{display:flex;}
+    .page {
+      display: none;
+      min-height: 100vh;
+    }
 
-/* ════════════════════════════
+    .page.active {
+      display: flex;
+    }
+
+    /* ════════════════════════════
    CONFIG MODAL
 ════════════════════════════ */
-.overlay{
-  position:fixed;inset:0;
-  background:rgba(250,248,244,.9);
-  backdrop-filter:blur(8px);
-  z-index:1000;display:flex;align-items:center;justify-content:center;padding:1.5rem;
-  animation:fadeIn .3s ease;
-}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes riseUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(250, 248, 244, .9);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: fadeIn .3s ease;
+    }
 
-.modal{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:2.5rem;
-  max-width:500px;width:100%;
-  box-shadow:var(--shadow-lg);
-  animation:riseUp .4s ease;
-}
-.modal-brand{
-  display:flex;align-items:baseline;gap:.4rem;
-  margin-bottom:1.8rem;
-}
-.modal-brand .logo-l{font-family:var(--font-serif);font-size:2rem;font-weight:900;color:var(--accent);}
-.modal-brand .logo-rest{font-family:var(--font-sans);font-size:1.2rem;font-weight:700;color:var(--ink);}
-.modal h2{font-family:var(--font-serif);font-size:1.4rem;font-weight:700;margin-bottom:.5rem;}
-.modal p{color:var(--ink2);font-size:.85rem;line-height:1.7;margin-bottom:1.5rem;}
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
 
-.sql-block{
-  background:#1a1714;color:#a8d5a2;
-  border-radius:var(--radius);padding:1rem 1.2rem;
-  font-family:monospace;font-size:.72rem;line-height:1.8;
-  margin-bottom:1.5rem;overflow-x:auto;white-space:pre;
-}
+      to {
+        opacity: 1
+      }
+    }
 
-label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem;}
-input[type=email],input[type=password],input[type=text],textarea,select{
-  width:100%;background:var(--card);border:1.5px solid var(--border);
-  border-radius:var(--radius);padding:.75rem 1rem;
-  color:var(--ink);font-family:var(--font-sans);font-size:.9rem;outline:none;
-  transition:border-color .2s,box-shadow .2s;
-}
-input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,84,26,.1);}
-.form-group{margin-bottom:1.1rem;}
-textarea{resize:vertical;min-height:120px;line-height:1.7;}
+    @keyframes riseUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
 
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
-  padding:.75rem 1.5rem;border:none;border-radius:var(--radius);
-  font-family:var(--font-sans);font-size:.88rem;font-weight:700;
-  cursor:pointer;transition:all .2s;letter-spacing:.01em;text-decoration:none;
-}
-.btn-primary{background:var(--accent);color:#fff;}
-.btn-primary:hover{background:#bf4a16;transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,84,26,.3);}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
-.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--border);}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
-.btn-ghost{background:transparent;color:var(--muted);border:none;padding:.5rem .8rem;}
-.btn-ghost:hover{background:var(--card);color:var(--ink);}
-.btn-full{width:100%;}
-.btn-sm{padding:.45rem 1rem;font-size:.78rem;}
-.btn-danger{background:transparent;color:#c0392b;border:1.5px solid #f0c8c5;}
-.btn-danger:hover{background:#fdf2f1;border-color:#c0392b;}
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
 
-.msg{padding:.7rem 1rem;border-radius:var(--radius);font-size:.82rem;margin-top:.8rem;display:none;}
-.msg.show{display:block;animation:riseUp .3s ease;}
-.msg.error{background:#fdf2f1;color:#c0392b;border:1px solid #f0c8c5;}
-.msg.success{background:#edf7f2;color:var(--success);border:1px solid #b8e4cc;}
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 2.5rem;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: riseUp .4s ease;
+    }
 
-/* ════════════════════════════
+    .modal-brand {
+      display: flex;
+      align-items: baseline;
+      gap: .4rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .modal-brand .logo-l {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .modal-brand .logo-rest {
+      font-family: var(--font-sans);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .modal h2 {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: .5rem;
+    }
+
+    .modal p {
+      color: var(--ink2);
+      font-size: .85rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .sql-block {
+      background: #1a1714;
+      color: #a8d5a2;
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      font-family: monospace;
+      font-size: .72rem;
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    label {
+      display: block;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+
+    input[type=email],
+    input[type=password],
+    input[type=text],
+    textarea,
+    select {
+      width: 100%;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .75rem 1rem;
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(212, 84, 26, .1);
+    }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.7;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: .75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .01em;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #bf4a16;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(212, 84, 26, .3);
+    }
+
+    .btn-primary:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      padding: .5rem .8rem;
+    }
+
+    .btn-ghost:hover {
+      background: var(--card);
+      color: var(--ink);
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn-sm {
+      padding: .45rem 1rem;
+      font-size: .78rem;
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: #c0392b;
+      border: 1.5px solid #f0c8c5;
+    }
+
+    .btn-danger:hover {
+      background: #fdf2f1;
+      border-color: #c0392b;
+    }
+
+    .msg {
+      padding: .7rem 1rem;
+      border-radius: var(--radius);
+      font-size: .82rem;
+      margin-top: .8rem;
+      display: none;
+    }
+
+    .msg.show {
+      display: block;
+      animation: riseUp .3s ease;
+    }
+
+    .msg.error {
+      background: #fdf2f1;
+      color: #c0392b;
+      border: 1px solid #f0c8c5;
+    }
+
+    .msg.success {
+      background: #edf7f2;
+      color: var(--success);
+      border: 1px solid #b8e4cc;
+    }
+
+    /* ════════════════════════════
    AUTH PAGE
 ════════════════════════════ */
-#auth-page{align-items:center;justify-content:center;padding:2rem;background:var(--bg);}
+    #auth-page {
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: var(--bg);
+    }
 
-.auth-wrap{display:flex;gap:4rem;align-items:center;max-width:900px;width:100%;}
+    .auth-wrap {
+      display: flex;
+      gap: 4rem;
+      align-items: center;
+      max-width: 900px;
+      width: 100%;
+    }
 
-.auth-hero{flex:1;animation:riseUp .5s ease;}
-.auth-hero .big-l{
-  font-family:var(--font-serif);font-size:9rem;font-weight:900;
-  color:var(--accent);line-height:1;margin-bottom:1rem;
-  text-shadow:6px 6px 0 rgba(212,84,26,.15);
-}
-.auth-hero h1{font-family:var(--font-serif);font-size:2.2rem;font-weight:700;line-height:1.3;margin-bottom:1rem;}
-.auth-hero p{color:var(--ink2);line-height:1.7;font-size:.95rem;margin-bottom:1.5rem;}
-.auth-badge{
-  display:inline-flex;align-items:center;gap:.4rem;
-  background:var(--accent-light);color:var(--accent);
-  border-radius:100px;padding:.35rem .9rem;font-size:.75rem;font-weight:700;
-}
+    .auth-hero {
+      flex: 1;
+      animation: riseUp .5s ease;
+    }
 
-.auth-box{
-  flex:0 0 380px;background:var(--surface);
-  border:1px solid var(--border);border-radius:18px;
-  padding:2.5rem;box-shadow:var(--shadow-lg);
-  animation:riseUp .5s .1s ease both;
-}
-.auth-box h2{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;margin-bottom:.3rem;}
-.auth-box .sub{color:var(--muted);font-size:.82rem;margin-bottom:1.8rem;}
+    .auth-hero .big-l {
+      font-family: var(--font-serif);
+      font-size: 9rem;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 1rem;
+      text-shadow: 6px 6px 0 rgba(212, 84, 26, .15);
+    }
 
-.auth-tabs{display:flex;gap:.4rem;background:var(--card);border-radius:8px;padding:.2rem;margin-bottom:1.5rem;}
-.tab-btn{flex:1;padding:.5rem;border:none;border-radius:6px;cursor:pointer;font-family:var(--font-sans);font-size:.82rem;font-weight:700;transition:all .2s;background:transparent;color:var(--muted);}
-.tab-btn.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 6px rgba(0,0,0,.1);}
+    .auth-hero h1 {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 1rem;
+    }
 
-@media(max-width:700px){
-  .auth-wrap{flex-direction:column;gap:2rem;}
-  .auth-hero .big-l{font-size:5rem;}
-  .auth-box{flex:none;width:100%;}
-}
+    .auth-hero p {
+      color: var(--ink2);
+      line-height: 1.7;
+      font-size: .95rem;
+      margin-bottom: 1.5rem;
+    }
 
-/* ════════════════════════════
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 100px;
+      padding: .35rem .9rem;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+
+    .auth-box {
+      flex: 0 0 380px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-lg);
+      animation: riseUp .5s .1s ease both;
+    }
+
+    .auth-box h2 {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: .3rem;
+    }
+
+    .auth-box .sub {
+      color: var(--muted);
+      font-size: .82rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: .4rem;
+      background: var(--card);
+      border-radius: 8px;
+      padding: .2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: .5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: .82rem;
+      font-weight: 700;
+      transition: all .2s;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, .1);
+    }
+
+    @media(max-width:700px) {
+      .auth-wrap {
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .auth-hero .big-l {
+        font-size: 5rem;
+      }
+
+      .auth-box {
+        flex: none;
+        width: 100%;
+      }
+    }
+
+    /* ════════════════════════════
    APP SHELL
 ════════════════════════════ */
-#app-page{flex-direction:row;}
+    #app-page {
+      flex-direction: row;
+    }
 
-/* SIDEBAR */
-.sidebar{
-  width:230px;flex-shrink:0;
-  background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  height:100vh;position:sticky;top:0;overflow-y:auto;
-  padding:1.5rem 0;
-}
-.sidebar-brand{padding:0 1.5rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:1.2rem;}
-.sidebar-brand .logo{display:flex;align-items:baseline;gap:.3rem;}
-.sidebar-brand .logo .l{font-family:var(--font-serif);font-size:1.6rem;font-weight:900;color:var(--accent);}
-.sidebar-brand .logo .rest{font-family:var(--font-sans);font-size:.95rem;font-weight:700;color:var(--ink);}
-.sidebar-brand .tagline{font-size:.7rem;color:var(--muted);margin-top:.2rem;}
+    /* SIDEBAR */
+    .sidebar {
+      width: 230px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+      padding: 1.5rem 0;
+    }
 
-nav{flex:1;}
-.nav-section{padding:0 .75rem;margin-bottom:.5rem;}
-.nav-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:.5rem .75rem;margin-bottom:.2rem;}
-.nav-item{
-  display:flex;align-items:center;gap:.75rem;
-  padding:.65rem .75rem;border-radius:8px;cursor:pointer;
-  font-size:.85rem;font-weight:500;color:var(--ink2);
-  transition:all .15s;text-decoration:none;
-}
-.nav-item:hover{background:var(--card);color:var(--ink);}
-.nav-item.active{background:var(--accent-light);color:var(--accent);font-weight:700;}
-.nav-icon{font-size:1rem;width:20px;text-align:center;}
-.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:100px;}
+    .sidebar-brand {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.2rem;
+    }
 
-.sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);margin-top:auto;}
-.user-pill{display:flex;align-items:center;gap:.7rem;}
-.user-avatar{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0;}
-.user-info{flex:1;min-width:0;}
-.user-name{font-size:.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.user-plan{font-size:.68rem;color:var(--muted);}
-.btn-signout{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:.2rem;transition:color .2s;}
-.btn-signout:hover{color:var(--accent);}
+    .sidebar-brand .logo {
+      display: flex;
+      align-items: baseline;
+      gap: .3rem;
+    }
 
-/* PLAN BADGE */
-.plan-chip{
-  display:inline-flex;align-items:center;gap:.3rem;
-  background:linear-gradient(135deg,#ffecd2,#fcb69f);
-  color:#a04000;border-radius:100px;
-  font-size:.65rem;font-weight:700;padding:.2rem .6rem;
-  text-transform:uppercase;letter-spacing:.05em;
-}
-.plan-chip.pro{background:linear-gradient(135deg,#a8edea,#fed6e3);color:#2a6070;}
+    .sidebar-brand .logo .l {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
 
-/* MAIN */
-.main-area{flex:1;overflow-y:auto;min-width:0;}
+    .sidebar-brand .logo .rest {
+      font-family: var(--font-sans);
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
 
-/* TOPBAR */
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:1.2rem 2rem;background:var(--surface);
-  border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:50;
-}
-.topbar h1{font-family:var(--font-serif);font-size:1.4rem;font-weight:700;}
-.topbar-actions{display:flex;gap:.75rem;align-items:center;}
+    .sidebar-brand .tagline {
+      font-size: .7rem;
+      color: var(--muted);
+      margin-top: .2rem;
+    }
 
-/* CONTENT */
-.content{padding:2rem;}
+    nav {
+      flex: 1;
+    }
 
-/* STAT CARDS */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
-.stat-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:14px;padding:1.3rem 1.5rem;
-  animation:riseUp .4s ease both;
-}
-.stat-card:nth-child(2){animation-delay:.05s;}
-.stat-card:nth-child(3){animation-delay:.1s;}
-.stat-card:nth-child(4){animation-delay:.15s;}
-.stat-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem;}
-.stat-value{font-family:var(--font-serif);font-size:2.2rem;font-weight:700;color:var(--ink);line-height:1;}
-.stat-change{font-size:.72rem;color:var(--success);margin-top:.3rem;font-weight:600;}
-.stat-change.down{color:#c0392b;}
+    .nav-section {
+      padding: 0 .75rem;
+      margin-bottom: .5rem;
+    }
 
-/* SECTION HEADER */
-.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;}
-.section-title{font-family:var(--font-serif);font-size:1.2rem;font-weight:700;}
+    .nav-label {
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      padding: .5rem .75rem;
+      margin-bottom: .2rem;
+    }
 
-/* NEWSLETTERS TABLE */
-.nl-table{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.nl-table-head{
-  display:grid;grid-template-columns:2fr 1fr 1fr 1fr 120px;
-  padding:.75rem 1.5rem;background:var(--card);
-  border-bottom:1px solid var(--border);
-  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
-}
-.nl-row{
-  display:grid;grid-template-columns:2fr 1fr 1fr 1fr 120px;
-  padding:1rem 1.5rem;border-bottom:1px solid var(--border);
-  align-items:center;transition:background .15s;animation:riseUp .3s ease both;
-}
-.nl-row:last-child{border-bottom:none;}
-.nl-row:hover{background:var(--card);}
-.nl-title{font-weight:600;font-size:.88rem;}
-.nl-sub{font-size:.75rem;color:var(--muted);margin-top:.15rem;}
-.status-chip{
-  display:inline-flex;align-items:center;gap:.3rem;
-  border-radius:100px;padding:.25rem .7rem;font-size:.72rem;font-weight:700;
-}
-.status-chip.draft{background:#f0f0f0;color:#666;}
-.status-chip.scheduled{background:#e8f4fd;color:var(--accent2);}
-.status-chip.sent{background:#edf7f2;color:var(--success);}
-.nl-actions{display:flex;gap:.4rem;justify-content:flex-end;}
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .65rem .75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--ink2);
+      transition: all .15s;
+      text-decoration: none;
+    }
 
-/* CALENDAR */
-.calendar-grid{
-  display:grid;grid-template-columns:repeat(7,1fr);
-  gap:.5rem;
-}
-.cal-head{
-  display:grid;grid-template-columns:repeat(7,1fr);
-  gap:.5rem;margin-bottom:.5rem;
-}
-.cal-day-label{font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;padding:.3rem;}
-.cal-cell{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:10px;padding:.6rem;min-height:80px;
-  font-size:.72rem;transition:border-color .2s;
-}
-.cal-cell:hover{border-color:var(--accent);}
-.cal-cell.today{border-color:var(--accent);background:var(--accent-light);}
-.cal-date{font-weight:700;font-size:.78rem;margin-bottom:.3rem;}
-.cal-cell.today .cal-date{color:var(--accent);}
-.cal-event{
-  background:var(--accent);color:#fff;
-  border-radius:4px;padding:.15rem .4rem;
-  font-size:.65rem;font-weight:600;margin-bottom:.2rem;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  cursor:pointer;
-}
-.cal-event.draft{background:var(--border);color:var(--ink2);}
-.cal-event.scheduled{background:var(--accent2);color:#fff;}
+    .nav-item:hover {
+      background: var(--card);
+      color: var(--ink);
+    }
 
-/* SUBSCRIBERS */
-.sub-table{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.sub-head{
-  display:grid;grid-template-columns:2fr 1fr 1fr 80px;
-  padding:.75rem 1.5rem;background:var(--card);
-  border-bottom:1px solid var(--border);
-  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
-}
-.sub-row{
-  display:grid;grid-template-columns:2fr 1fr 1fr 80px;
-  padding:.9rem 1.5rem;border-bottom:1px solid var(--border);
-  align-items:center;font-size:.85rem;animation:riseUp .3s ease both;
-}
-.sub-row:last-child{border-bottom:none;}
-.sub-row:hover{background:var(--card);}
-.sub-email{font-weight:500;}
-.sub-source{font-size:.75rem;color:var(--muted);}
-.active-dot{display:inline-block;width:7px;height:7px;background:var(--success);border-radius:50%;margin-right:.4rem;}
+    .nav-item.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 700;
+    }
 
-/* EDITOR */
-.editor-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.editor-toolbar{
-  display:flex;align-items:center;gap:.25rem;
-  padding:.75rem 1rem;border-bottom:1px solid var(--border);
-  background:var(--card);flex-wrap:wrap;
-}
-.tool-btn{
-  background:none;border:none;color:var(--ink2);
-  cursor:pointer;padding:.35rem .55rem;border-radius:6px;
-  font-size:.82rem;font-weight:600;transition:all .15s;
-}
-.tool-btn:hover{background:var(--border);color:var(--ink);}
-.tool-sep{width:1px;height:20px;background:var(--border);margin:0 .25rem;}
-.editor-meta{padding:1rem 1.5rem;border-bottom:1px solid var(--border);}
-.editor-meta input{border:none;background:transparent;font-family:var(--font-serif);font-size:1.5rem;font-weight:700;width:100%;outline:none;color:var(--ink);}
-.editor-body{padding:1.5rem;}
-.editor-body textarea{border:none;background:transparent;width:100%;min-height:300px;outline:none;font-family:var(--font-sans);font-size:.95rem;line-height:1.8;color:var(--ink);resize:none;}
+    .nav-icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
 
-/* UPGRADE BANNER */
-.upgrade-banner{
-  background:linear-gradient(135deg,#1a1714 60%,#3a2a1a);
-  border-radius:14px;padding:1.5rem 2rem;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:1rem;margin-bottom:2rem;
-  animation:riseUp .5s ease;
-}
-.upgrade-banner h3{font-family:var(--font-serif);font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.3rem;}
-.upgrade-banner p{font-size:.8rem;color:rgba(255,255,255,.6);}
-.btn-upgrade{background:var(--accent);color:#fff;border:none;padding:.6rem 1.4rem;border-radius:var(--radius);font-family:var(--font-sans);font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:all .2s;}
-.btn-upgrade:hover{background:#bf4a16;}
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      padding: .15rem .45rem;
+      border-radius: 100px;
+    }
 
-/* EMPTY */
-.empty{text-align:center;padding:3rem 1rem;color:var(--muted);}
-.empty-icon{font-size:2.5rem;margin-bottom:.8rem;}
-.empty p{font-size:.88rem;margin-bottom:1.2rem;}
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
 
-/* LOADING */
-.loading{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem;}
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+    }
 
-/* MODAL SMALL */
-.mini-modal-overlay{position:fixed;inset:0;background:rgba(26,23,20,.4);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:fadeIn .2s ease;}
-.mini-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;max-width:480px;width:100%;box-shadow:var(--shadow-lg);animation:riseUp .3s ease;}
-.mini-modal h3{font-family:var(--font-serif);font-size:1.2rem;font-weight:700;margin-bottom:1.2rem;}
-.modal-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem;}
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: .8rem;
+      flex-shrink: 0;
+    }
 
-@media(max-width:900px){
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .nl-table-head,.nl-row{grid-template-columns:2fr 1fr 100px;}
-  .nl-row > *:nth-child(3),.nl-row > *:nth-child(4),.nl-table-head > *:nth-child(3),.nl-table-head > *:nth-child(4){display:none;}
-}
-@media(max-width:640px){
-  .sidebar{display:none;}
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .content{padding:1rem;}
-}
-</style>
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: .8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-plan {
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    .btn-signout {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .85rem;
+      padding: .2rem;
+      transition: color .2s;
+    }
+
+    .btn-signout:hover {
+      color: var(--accent);
+    }
+
+    /* PLAN BADGE */
+    .plan-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      color: #a04000;
+      border-radius: 100px;
+      font-size: .65rem;
+      font-weight: 700;
+      padding: .2rem .6rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .plan-chip.pro {
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      color: #2a6070;
+    }
+
+    /* MAIN */
+    .main-area {
+      flex: 1;
+      overflow-y: auto;
+      min-width: 0;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar h1 {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 2rem;
+    }
+
+    /* STAT CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.3rem 1.5rem;
+      animation: riseUp .4s ease both;
+    }
+
+    .stat-card:nth-child(2) {
+      animation-delay: .05s;
+    }
+
+    .stat-card:nth-child(3) {
+      animation-delay: .1s;
+    }
+
+    .stat-card:nth-child(4) {
+      animation-delay: .15s;
+    }
+
+    .stat-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+
+    .stat-value {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .stat-change {
+      font-size: .72rem;
+      color: var(--success);
+      margin-top: .3rem;
+      font-weight: 600;
+    }
+
+    .stat-change.down {
+      color: #c0392b;
+    }
+
+    /* SECTION HEADER */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    /* NEWSLETTERS TABLE */
+    .nl-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .nl-table-head {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+      padding: .75rem 1.5rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .nl-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      transition: background .15s;
+      animation: riseUp .3s ease both;
+    }
+
+    .nl-row:last-child {
+      border-bottom: none;
+    }
+
+    .nl-row:hover {
+      background: var(--card);
+    }
+
+    .nl-title {
+      font-weight: 600;
+      font-size: .88rem;
+    }
+
+    .nl-sub {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .15rem;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      border-radius: 100px;
+      padding: .25rem .7rem;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+
+    .status-chip.draft {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .status-chip.scheduled {
+      background: #e8f4fd;
+      color: var(--accent2);
+    }
+
+    .status-chip.sent {
+      background: #edf7f2;
+      color: var(--success);
+    }
+
+    .nl-actions {
+      display: flex;
+      gap: .4rem;
+      justify-content: flex-end;
+    }
+
+    /* CALENDAR */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: .5rem;
+    }
+
+    .cal-head {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: .5rem;
+      margin-bottom: .5rem;
+    }
+
+    .cal-day-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      padding: .3rem;
+    }
+
+    .cal-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .6rem;
+      min-height: 80px;
+      font-size: .72rem;
+      transition: border-color .2s;
+    }
+
+    .cal-cell:hover {
+      border-color: var(--accent);
+    }
+
+    .cal-cell.today {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .cal-date {
+      font-weight: 700;
+      font-size: .78rem;
+      margin-bottom: .3rem;
+    }
+
+    .cal-cell.today .cal-date {
+      color: var(--accent);
+    }
+
+    .cal-event {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 4px;
+      padding: .15rem .4rem;
+      font-size: .65rem;
+      font-weight: 600;
+      margin-bottom: .2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .cal-event.draft {
+      background: var(--border);
+      color: var(--ink2);
+    }
+
+    .cal-event.scheduled {
+      background: var(--accent2);
+      color: #fff;
+    }
+
+    /* SUBSCRIBERS */
+    .sub-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .sub-head {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 80px;
+      padding: .75rem 1.5rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .sub-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 80px;
+      padding: .9rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      font-size: .85rem;
+      animation: riseUp .3s ease both;
+    }
+
+    .sub-row:last-child {
+      border-bottom: none;
+    }
+
+    .sub-row:hover {
+      background: var(--card);
+    }
+
+    .sub-email {
+      font-weight: 500;
+    }
+
+    .sub-source {
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .active-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      margin-right: .4rem;
+    }
+
+    /* EDITOR */
+    .editor-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      flex-wrap: wrap;
+    }
+
+    .tool-btn {
+      background: none;
+      border: none;
+      color: var(--ink2);
+      cursor: pointer;
+      padding: .35rem .55rem;
+      border-radius: 6px;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: all .15s;
+    }
+
+    .tool-btn:hover {
+      background: var(--border);
+      color: var(--ink);
+    }
+
+    .tool-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 .25rem;
+    }
+
+    .editor-meta {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .editor-meta input {
+      border: none;
+      background: transparent;
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      width: 100%;
+      outline: none;
+      color: var(--ink);
+    }
+
+    .editor-body {
+      padding: 1.5rem;
+    }
+
+    .editor-body textarea {
+      border: none;
+      background: transparent;
+      width: 100%;
+      min-height: 300px;
+      outline: none;
+      font-family: var(--font-sans);
+      font-size: .95rem;
+      line-height: 1.8;
+      color: var(--ink);
+      resize: none;
+    }
+
+    /* UPGRADE BANNER */
+    .upgrade-banner {
+      background: linear-gradient(135deg, #1a1714 60%, #3a2a1a);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      animation: riseUp .5s ease;
+    }
+
+    .upgrade-banner h3 {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: .3rem;
+    }
+
+    .upgrade-banner p {
+      font-size: .8rem;
+      color: rgba(255, 255, 255, .6);
+    }
+
+    .btn-upgrade {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: .6rem 1.4rem;
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: .82rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .2s;
+    }
+
+    .btn-upgrade:hover {
+      background: #bf4a16;
+    }
+
+    /* EMPTY */
+    .empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: .8rem;
+    }
+
+    .empty p {
+      font-size: .88rem;
+      margin-bottom: 1.2rem;
+    }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    /* MODAL SMALL */
+    .mini-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 23, 20, .4);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: fadeIn .2s ease;
+    }
+
+    .mini-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: riseUp .3s ease;
+    }
+
+    .mini-modal h3 {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: .75rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    @media(max-width:900px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .nl-table-head,
+      .nl-row {
+        grid-template-columns: 2fr 1fr 100px;
+      }
+
+      .nl-row>*:nth-child(3),
+      .nl-row>*:nth-child(4),
+      .nl-table-head>*:nth-child(3),
+      .nl-table-head>*:nth-child(4) {
+        display: none;
+      }
+    }
+
+    @media(max-width:640px) {
+      .sidebar {
+        display: none;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .content {
+        padding: 1rem;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ═══ CONFIG MODAL ═══ -->
-<div class="overlay" id="config-modal">
-<div class="modal">
-  <div class="modal-brand"><span class="logo-l">L</span><span class="logo-rest">ettrd</span></div>
-  <h2>Connecter Supabase</h2>
-  <p>Entrez vos clés depuis <strong>supabase.com → Settings → API</strong>. Puis exécutez ce SQL dans l'éditeur SQL de votre projet :</p>
-  <div class="sql-block">-- 1. Table newsletters
-CREATE TABLE newsletters (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id uuid REFERENCES auth.users NOT NULL,
-  title text NOT NULL,
-  content text DEFAULT '',
-  status text DEFAULT 'draft',
-  scheduled_at timestamptz,
-  sent_at timestamptz,
-  created_at timestamptz DEFAULT now()
-);
-ALTER TABLE newsletters ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "own newsletters" ON newsletters FOR ALL USING (auth.uid() = user_id);
+  <!-- ═══ CONFIG MODAL ═══ -->
+  <div class="overlay" id="config-modal">
+    <div class="modal">
+      <div class="modal-brand"><span class="logo-l">L</span><span class="logo-rest">ettrd</span></div>
+      <h2>Connecter Supabase</h2>
+      <p>Entrez vos clés depuis <strong>supabase.com → Settings → API</strong>. Puis exécutez ce SQL dans l'éditeur SQL
+        de votre projet :</p>
+      <div class="sql-block">-- 1. Table newsletters
+        CREATE TABLE newsletters (
+        id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id uuid REFERENCES auth.users NOT NULL,
+        title text NOT NULL,
+        content text DEFAULT '',
+        status text DEFAULT 'draft',
+        scheduled_at timestamptz,
+        sent_at timestamptz,
+        created_at timestamptz DEFAULT now()
+        );
+        ALTER TABLE newsletters ENABLE ROW LEVEL SECURITY;
+        CREATE POLICY "own newsletters" ON newsletters FOR ALL USING (auth.uid() = user_id);
 
--- 2. Table subscribers
-CREATE TABLE subscribers (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id uuid REFERENCES auth.users NOT NULL,
-  email text NOT NULL,
-  name text,
-  source text DEFAULT 'manual',
-  active boolean DEFAULT true,
-  created_at timestamptz DEFAULT now()
-);
-ALTER TABLE subscribers ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "own subscribers" ON subscribers FOR ALL USING (auth.uid() = user_id);</div>
-  <div class="form-group"><label>Supabase URL</label><input type="text" id="cfg-url" placeholder="https://xxxx.supabase.co"/></div>
-  <div class="form-group"><label>Anon Key</label><input type="text" id="cfg-key" placeholder="eyJhbGci..."/></div>
-  <button class="btn btn-primary btn-full" onclick="saveConfig()">Lancer Lettrd →</button>
-  <div class="msg" id="cfg-msg"></div>
-</div>
-</div>
-
-<!-- ═══ AUTH PAGE ═══ -->
-<div class="page" id="auth-page">
-  <div class="auth-wrap">
-    <div class="auth-hero">
-      <div class="big-l">L</div>
-      <h1>Vos newsletters,<br/>en équipe.</h1>
-      <p>Lettrd est la plateforme pensée pour les startups qui veulent créer, planifier et analyser leurs newsletters — sans friction, sans chaos.</p>
-      <span class="auth-badge">✦ Freemium — Gratuit pour démarrer</span>
-    </div>
-    <div class="auth-box">
-      <h2>Bienvenue</h2>
-      <p class="sub">Connectez-vous ou créez votre compte.</p>
-      <div class="auth-tabs">
-        <button class="tab-btn active" onclick="switchAuthTab('login',this)">Connexion</button>
-        <button class="tab-btn" onclick="switchAuthTab('signup',this)">Inscription</button>
-      </div>
-      <div id="login-form">
-        <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="vous@startup.com"/></div>
-        <div class="form-group"><label>Mot de passe</label><input type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/></div>
-        <button class="btn btn-primary btn-full" onclick="login()" id="btn-login">Se connecter →</button>
-      </div>
-      <div id="signup-form" style="display:none">
-        <div class="form-group"><label>Email</label><input type="email" id="signup-email" placeholder="vous@startup.com"/></div>
-        <div class="form-group"><label>Mot de passe</label><input type="password" id="signup-pw" placeholder="Min. 6 caractères" onkeydown="if(event.key==='Enter')signup()"/></div>
-        <button class="btn btn-primary btn-full" onclick="signup()" id="btn-signup">Créer mon compte →</button>
-      </div>
-      <div class="msg" id="auth-msg"></div>
+        -- 2. Table subscribers
+        CREATE TABLE subscribers (
+        id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id uuid REFERENCES auth.users NOT NULL,
+        email text NOT NULL,
+        name text,
+        source text DEFAULT 'manual',
+        active boolean DEFAULT true,
+        created_at timestamptz DEFAULT now()
+        );
+        ALTER TABLE subscribers ENABLE ROW LEVEL SECURITY;
+        CREATE POLICY "own subscribers" ON subscribers FOR ALL USING (auth.uid() = user_id);</div>
+      <div class="form-group"><label>Supabase URL</label><input type="text" id="cfg-url"
+          placeholder="https://xxxx.supabase.co" /></div>
+      <div class="form-group"><label>Anon Key</label><input type="text" id="cfg-key" placeholder="eyJhbGci..." /></div>
+      <button class="btn btn-primary btn-full" onclick="saveConfig()">Lancer Lettrd →</button>
+      <div class="msg" id="cfg-msg"></div>
     </div>
   </div>
-</div>
 
-<!-- ═══ APP PAGE ═══ -->
-<div class="page" id="app-page">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <div class="logo"><span class="l">L</span><span class="rest">ettrd</span></div>
-      <div class="tagline">Newsletters collaboratives</div>
-    </div>
-    <nav>
-      <div class="nav-section">
-        <div class="nav-label">Workspace</div>
-        <a class="nav-item active" onclick="showView('dashboard',this)"><span class="nav-icon">◈</span> Dashboard</a>
-        <a class="nav-item" onclick="showView('newsletters',this)"><span class="nav-icon">✉</span> Newsletters</a>
-        <a class="nav-item" onclick="showView('calendar',this)"><span class="nav-icon">◷</span> Calendrier</a>
-        <a class="nav-item" onclick="showView('subscribers',this)"><span class="nav-icon">◎</span> Abonnés</a>
+  <!-- ═══ AUTH PAGE ═══ -->
+  <div class="page" id="auth-page">
+    <div class="auth-wrap">
+      <div class="auth-hero">
+        <div class="big-l">L</div>
+        <h1>Vos newsletters,<br />en équipe.</h1>
+        <p>Lettrd est la plateforme pensée pour les startups qui veulent créer, planifier et analyser leurs newsletters
+          — sans friction, sans chaos.</p>
+        <span class="auth-badge">✦ Freemium — Gratuit pour démarrer</span>
       </div>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-pill">
-        <div class="user-avatar" id="sidebar-avatar">?</div>
-        <div class="user-info">
-          <div class="user-name" id="sidebar-email">—</div>
-          <div class="user-plan"><span class="plan-chip" id="plan-chip">Free</span></div>
+      <div class="auth-box">
+        <h2>Bienvenue</h2>
+        <p class="sub">Connectez-vous ou créez votre compte.</p>
+        <div class="auth-tabs">
+          <button class="tab-btn active" onclick="switchAuthTab('login',this)">Connexion</button>
+          <button class="tab-btn" onclick="switchAuthTab('signup',this)">Inscription</button>
         </div>
-        <button class="btn-signout" onclick="logout()" title="Déconnexion">⏻</button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <div class="main-area">
-
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <h1 id="topbar-title">Dashboard</h1>
-      <div class="topbar-actions">
-        <button class="btn btn-outline btn-sm" onclick="openNewsletter()">✦ Nouvelle newsletter</button>
-        <button class="btn btn-primary btn-sm" onclick="showView('subscribers')">+ Abonné</button>
+        <div id="login-form">
+          <div class="form-group"><label>Email</label><input type="email" id="login-email"
+              placeholder="vous@startup.com" /></div>
+          <div class="form-group"><label>Mot de passe</label><input type="password" id="login-pw" placeholder="••••••••"
+              onkeydown="if(event.key==='Enter')login()" /></div>
+          <button class="btn btn-primary btn-full" onclick="login()" id="btn-login">Se connecter →</button>
+        </div>
+        <div id="signup-form" style="display:none">
+          <div class="form-group"><label>Email</label><input type="email" id="signup-email"
+              placeholder="vous@startup.com" /></div>
+          <div class="form-group"><label>Mot de passe</label><input type="password" id="signup-pw"
+              placeholder="Min. 6 caractères" onkeydown="if(event.key==='Enter')signup()" /></div>
+          <button class="btn btn-primary btn-full" onclick="signup()" id="btn-signup">Créer mon compte →</button>
+        </div>
+        <div class="msg" id="auth-msg"></div>
       </div>
     </div>
+  </div>
 
-    <div class="content">
+  <!-- ═══ APP PAGE ═══ -->
+  <div class="page" id="app-page">
 
-      <!-- UPGRADE BANNER -->
-      <div class="upgrade-banner" id="upgrade-banner">
-        <div>
-          <h3>Passez à Lettrd Pro ✦</h3>
-          <p>Analytics avancés, newsletters illimitées, domaine personnalisé.</p>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo"><span class="l">L</span><span class="rest">ettrd</span></div>
+        <div class="tagline">Newsletters collaboratives</div>
+      </div>
+      <nav>
+        <div class="nav-section">
+          <div class="nav-label">Workspace</div>
+          <a class="nav-item active" onclick="showView('dashboard',this)"><span class="nav-icon">◈</span> Dashboard</a>
+          <a class="nav-item" onclick="showView('newsletters',this)"><span class="nav-icon">✉</span> Newsletters</a>
+          <a class="nav-item" onclick="showView('calendar',this)"><span class="nav-icon">◷</span> Calendrier</a>
+          <a class="nav-item" onclick="showView('subscribers',this)"><span class="nav-icon">◎</span> Abonnés</a>
         </div>
-        <button class="btn-upgrade">Voir les plans →</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-pill">
+          <div class="user-avatar" id="sidebar-avatar">?</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-email">—</div>
+            <div class="user-plan"><span class="plan-chip" id="plan-chip">Free</span></div>
+          </div>
+          <button class="btn-signout" onclick="logout()" title="Déconnexion">⏻</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-area">
+
+      <!-- TOPBAR -->
+      <div class="topbar">
+        <h1 id="topbar-title">Dashboard</h1>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-sm" onclick="openNewsletter()">✦ Nouvelle newsletter</button>
+          <button class="btn btn-primary btn-sm" onclick="showView('subscribers')">+ Abonné</button>
+        </div>
       </div>
 
-      <!-- ── DASHBOARD ── -->
-      <div id="view-dashboard">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">Abonnés</div>
-            <div class="stat-value" id="stat-subs">—</div>
-            <div class="stat-change">↑ actifs</div>
+      <div class="content">
+
+        <!-- UPGRADE BANNER -->
+        <div class="upgrade-banner" id="upgrade-banner">
+          <div>
+            <h3>Passez à Lettrd Pro ✦</h3>
+            <p>Analytics avancés, newsletters illimitées, domaine personnalisé.</p>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">Newsletters</div>
-            <div class="stat-value" id="stat-nl">—</div>
-            <div class="stat-change">total</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Envoyées</div>
-            <div class="stat-value" id="stat-sent">—</div>
-            <div class="stat-change">ce mois</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Brouillons</div>
-            <div class="stat-value" id="stat-draft">—</div>
-            <div class="stat-change">en cours</div>
-          </div>
+          <button class="btn-upgrade">Voir les plans →</button>
         </div>
 
-        <div class="section-head">
-          <span class="section-title">Dernières newsletters</span>
-          <button class="btn btn-ghost btn-sm" onclick="showView('newsletters')">Voir tout →</button>
-        </div>
-        <div id="dash-nl-list"><div class="loading">Chargement…</div></div>
-      </div>
+        <!-- ── DASHBOARD ── -->
+        <div id="view-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Abonnés</div>
+              <div class="stat-value" id="stat-subs">—</div>
+              <div class="stat-change">↑ actifs</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Newsletters</div>
+              <div class="stat-value" id="stat-nl">—</div>
+              <div class="stat-change">total</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Envoyées</div>
+              <div class="stat-value" id="stat-sent">—</div>
+              <div class="stat-change">ce mois</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Brouillons</div>
+              <div class="stat-value" id="stat-draft">—</div>
+              <div class="stat-change">en cours</div>
+            </div>
+          </div>
 
-      <!-- ── NEWSLETTERS ── -->
-      <div id="view-newsletters" style="display:none">
-        <div class="section-head">
-          <span class="section-title">Toutes les newsletters</span>
-          <button class="btn btn-primary btn-sm" onclick="openNewsletter()">✦ Nouvelle</button>
-        </div>
-        <div id="nl-list"><div class="loading">Chargement…</div></div>
-      </div>
-
-      <!-- ── CALENDAR ── -->
-      <div id="view-calendar" style="display:none">
-        <div class="section-head">
-          <span class="section-title" id="cal-month-title">—</span>
-          <div style="display:flex;gap:.5rem">
-            <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)">←</button>
-            <button class="btn btn-outline btn-sm" onclick="changeMonth(1)">→</button>
+          <div class="section-head">
+            <span class="section-title">Dernières newsletters</span>
+            <button class="btn btn-ghost btn-sm" onclick="showView('newsletters')">Voir tout →</button>
+          </div>
+          <div id="dash-nl-list">
+            <div class="loading">Chargement…</div>
           </div>
         </div>
-        <div class="cal-head">
-          <div class="cal-day-label">Lun</div><div class="cal-day-label">Mar</div>
-          <div class="cal-day-label">Mer</div><div class="cal-day-label">Jeu</div>
-          <div class="cal-day-label">Ven</div><div class="cal-day-label">Sam</div>
-          <div class="cal-day-label">Dim</div>
-        </div>
-        <div class="calendar-grid" id="calendar-grid"></div>
-      </div>
 
-      <!-- ── SUBSCRIBERS ── -->
-      <div id="view-subscribers" style="display:none">
-        <div class="section-head">
-          <span class="section-title">Abonnés</span>
-          <button class="btn btn-primary btn-sm" onclick="openAddSubscriber()">+ Ajouter</button>
+        <!-- ── NEWSLETTERS ── -->
+        <div id="view-newsletters" style="display:none">
+          <div class="section-head">
+            <span class="section-title">Toutes les newsletters</span>
+            <button class="btn btn-primary btn-sm" onclick="openNewsletter()">✦ Nouvelle</button>
+          </div>
+          <div id="nl-list">
+            <div class="loading">Chargement…</div>
+          </div>
         </div>
-        <div id="sub-list"><div class="loading">Chargement…</div></div>
-      </div>
 
+        <!-- ── CALENDAR ── -->
+        <div id="view-calendar" style="display:none">
+          <div class="section-head">
+            <span class="section-title" id="cal-month-title">—</span>
+            <div style="display:flex;gap:.5rem">
+              <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)">←</button>
+              <button class="btn btn-outline btn-sm" onclick="changeMonth(1)">→</button>
+            </div>
+          </div>
+          <div class="cal-head">
+            <div class="cal-day-label">Lun</div>
+            <div class="cal-day-label">Mar</div>
+            <div class="cal-day-label">Mer</div>
+            <div class="cal-day-label">Jeu</div>
+            <div class="cal-day-label">Ven</div>
+            <div class="cal-day-label">Sam</div>
+            <div class="cal-day-label">Dim</div>
+          </div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+
+        <!-- ── SUBSCRIBERS ── -->
+        <div id="view-subscribers" style="display:none">
+          <div class="section-head">
+            <span class="section-title">Abonnés</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddSubscriber()">+ Ajouter</button>
+          </div>
+          <div id="sub-list">
+            <div class="loading">Chargement…</div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ═══ NEWSLETTER EDITOR MODAL ═══ -->
-<div class="mini-modal-overlay" id="editor-modal" style="display:none">
-<div class="mini-modal" style="max-width:680px">
-  <h3 id="editor-modal-title">Nouvelle newsletter</h3>
-  <div class="form-group">
-    <label>Titre / Sujet</label>
-    <input type="text" id="nl-title-input" placeholder="Ex: Notre actu de septembre 🚀"/>
+  <!-- ═══ NEWSLETTER EDITOR MODAL ═══ -->
+  <div class="mini-modal-overlay" id="editor-modal" style="display:none">
+    <div class="mini-modal" style="max-width:680px">
+      <h3 id="editor-modal-title">Nouvelle newsletter</h3>
+      <div class="form-group">
+        <label>Titre / Sujet</label>
+        <input type="text" id="nl-title-input" placeholder="Ex: Notre actu de septembre 🚀" />
+      </div>
+      <div class="form-group">
+        <label>Statut</label>
+        <select id="nl-status-input">
+          <option value="draft">Brouillon</option>
+          <option value="scheduled">Planifiée</option>
+          <option value="sent">Envoyée</option>
+        </select>
+      </div>
+      <div class="form-group" id="scheduled-date-group">
+        <label>Date de planification</label>
+        <input type="datetime-local" id="nl-scheduled-input" />
+      </div>
+      <div class="form-group">
+        <label>Contenu</label>
+        <textarea id="nl-content-input" placeholder="Rédigez le contenu de votre newsletter ici…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('editor-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveNewsletter()" id="btn-save-nl">Enregistrer</button>
+      </div>
+      <div class="msg" id="nl-msg"></div>
+    </div>
   </div>
-  <div class="form-group">
-    <label>Statut</label>
-    <select id="nl-status-input">
-      <option value="draft">Brouillon</option>
-      <option value="scheduled">Planifiée</option>
-      <option value="sent">Envoyée</option>
-    </select>
+
+  <!-- ═══ ADD SUBSCRIBER MODAL ═══ -->
+  <div class="mini-modal-overlay" id="sub-modal" style="display:none">
+    <div class="mini-modal">
+      <h3>Ajouter un abonné</h3>
+      <div class="form-group"><label>Email *</label><input type="email" id="sub-email-input"
+          placeholder="contact@exemple.com" /></div>
+      <div class="form-group"><label>Nom</label><input type="text" id="sub-name-input" placeholder="Jean Dupont" />
+      </div>
+      <div class="form-group">
+        <label>Source</label>
+        <select id="sub-source-input">
+          <option value="manual">Ajout manuel</option>
+          <option value="landing">Landing page</option>
+          <option value="import">Import</option>
+          <option value="referral">Référence</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('sub-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="addSubscriber()" id="btn-save-sub">Ajouter</button>
+      </div>
+      <div class="msg" id="sub-msg"></div>
+    </div>
   </div>
-  <div class="form-group" id="scheduled-date-group">
-    <label>Date de planification</label>
-    <input type="datetime-local" id="nl-scheduled-input"/>
-  </div>
-  <div class="form-group">
-    <label>Contenu</label>
-    <textarea id="nl-content-input" placeholder="Rédigez le contenu de votre newsletter ici…"></textarea>
-  </div>
-  <div class="modal-actions">
-    <button class="btn btn-outline" onclick="closeModal('editor-modal')">Annuler</button>
-    <button class="btn btn-primary" onclick="saveNewsletter()" id="btn-save-nl">Enregistrer</button>
-  </div>
-  <div class="msg" id="nl-msg"></div>
-</div>
-</div>
 
-<!-- ═══ ADD SUBSCRIBER MODAL ═══ -->
-<div class="mini-modal-overlay" id="sub-modal" style="display:none">
-<div class="mini-modal">
-  <h3>Ajouter un abonné</h3>
-  <div class="form-group"><label>Email *</label><input type="email" id="sub-email-input" placeholder="contact@exemple.com"/></div>
-  <div class="form-group"><label>Nom</label><input type="text" id="sub-name-input" placeholder="Jean Dupont"/></div>
-  <div class="form-group">
-    <label>Source</label>
-    <select id="sub-source-input">
-      <option value="manual">Ajout manuel</option>
-      <option value="landing">Landing page</option>
-      <option value="import">Import</option>
-      <option value="referral">Référence</option>
-    </select>
-  </div>
-  <div class="modal-actions">
-    <button class="btn btn-outline" onclick="closeModal('sub-modal')">Annuler</button>
-    <button class="btn btn-primary" onclick="addSubscriber()" id="btn-save-sub">Ajouter</button>
-  </div>
-  <div class="msg" id="sub-msg"></div>
-</div>
-</div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ── STATE ──
+    let sb = null, user = null;
+    let newsletters = [], subscribers = [];
+    let currentNlId = null;
+    let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// ── STATE ──
-let sb = null, user = null;
-let newsletters = [], subscribers = [];
-let currentNlId = null;
-let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+    // ── INIT ──
+    window.addEventListener('load', () => {
+      const url = 'https://egpecwfrejbhmjipdfwe.supabase.co';
+      const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVncGVjd2ZyZWpiaG1qaXBkZndlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NzM3MzYsImV4cCI6MjA4OTI0OTczNn0.SDsHrf-xx0wbrqW8Gh0vM3a_vS_PN5OEpRgpHsuKkEM';
 
-// ── INIT ──
-window.addEventListener('load', () => {
-  const url = localStorage.getItem('sb_url'), key = localStorage.getItem('sb_key');
-  if (url && key) { initSB(url, key); checkSession(); }
-  else show('config-modal');
+      initSB(url, key);
+      checkSession();
 
-  document.getElementById('nl-status-input').addEventListener('change', e => {
-    document.getElementById('scheduled-date-group').style.display = e.target.value === 'scheduled' ? 'block' : 'none';
-  });
-  document.getElementById('scheduled-date-group').style.display = 'none';
-});
+      document.getElementById('nl-status-input').addEventListener('change', e => {
+        document.getElementById('scheduled-date-group').style.display = e.target.value === 'scheduled' ? 'block' : 'none';
+      });
+      document.getElementById('scheduled-date-group').style.display = 'none';
+    });
 
-function initSB(url, key){ sb = window.supabase.createClient(url, key); }
+    function initSB(url, key) { sb = window.supabase.createClient(url, key); }
 
-async function saveConfig(){
-  const url = document.getElementById('cfg-url').value.trim();
-  const key = document.getElementById('cfg-key').value.trim();
-  if(!url||!key){ showMsg('cfg-msg','Veuillez remplir les deux champs.','error'); return; }
-  localStorage.setItem('sb_url', url); localStorage.setItem('sb_key', key);
-  initSB(url, key);
-  document.getElementById('config-modal').style.display = 'none';
-  checkSession();
-}
+    async function saveConfig() {
+      const url = document.getElementById('cfg-url').value.trim();
+      const key = document.getElementById('cfg-key').value.trim();
+      if (!url || !key) { showMsg('cfg-msg', 'Veuillez remplir les deux champs.', 'error'); return; }
+      localStorage.setItem('sb_url', url); localStorage.setItem('sb_key', key);
+      initSB(url, key);
+      document.getElementById('config-modal').style.display = 'none';
+      checkSession();
+    }
 
-async function checkSession(){
-  const {data:{session}} = await sb.auth.getSession();
-  if(session){ user = session.user; launchApp(); }
-  else showPage('auth-page');
-}
+    async function checkSession() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) { user = session.user; launchApp(); }
+      else showPage('auth-page');
+    }
 
-// ── AUTH ──
-function switchAuthTab(tab, el){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('login-form').style.display  = tab==='login'  ? 'block' : 'none';
-  document.getElementById('signup-form').style.display = tab==='signup' ? 'block' : 'none';
-  hideMsg('auth-msg');
-}
+    // ── AUTH ──
+    function switchAuthTab(tab, el) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+      hideMsg('auth-msg');
+    }
 
-async function login(){
-  const email = document.getElementById('login-email').value.trim();
-  const pw    = document.getElementById('login-pw').value;
-  if(!email||!pw){ showMsg('auth-msg','Email et mot de passe requis.','error'); return; }
-  setLoading('btn-login', true, 'Connexion…');
-  const {data, error} = await sb.auth.signInWithPassword({email, password:pw});
-  setLoading('btn-login', false, 'Se connecter →');
-  if(error){ showMsg('auth-msg', error.message, 'error'); return; }
-  user = data.user; launchApp();
-}
+    async function login() {
+      const email = document.getElementById('login-email').value.trim();
+      const pw = document.getElementById('login-pw').value;
+      if (!email || !pw) { showMsg('auth-msg', 'Email et mot de passe requis.', 'error'); return; }
+      setLoading('btn-login', true, 'Connexion…');
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+      setLoading('btn-login', false, 'Se connecter →');
+      if (error) { showMsg('auth-msg', error.message, 'error'); return; }
+      user = data.user; launchApp();
+    }
 
-async function signup(){
-  const email = document.getElementById('signup-email').value.trim();
-  const pw    = document.getElementById('signup-pw').value;
-  if(!email||!pw){ showMsg('auth-msg','Email et mot de passe requis.','error'); return; }
-  if(pw.length<6){ showMsg('auth-msg','6 caractères minimum.','error'); return; }
-  setLoading('btn-signup', true, 'Création…');
-  const {data, error} = await sb.auth.signUp({email, password:pw});
-  setLoading('btn-signup', false, 'Créer mon compte →');
-  if(error){ showMsg('auth-msg', error.message, 'error'); return; }
-  if(data.session){ user=data.user; launchApp(); }
-  else showMsg('auth-msg','✓ Compte créé ! Vérifiez votre email.','success');
-}
+    async function signup() {
+      const email = document.getElementById('signup-email').value.trim();
+      const pw = document.getElementById('signup-pw').value;
+      if (!email || !pw) { showMsg('auth-msg', 'Email et mot de passe requis.', 'error'); return; }
+      if (pw.length < 6) { showMsg('auth-msg', '6 caractères minimum.', 'error'); return; }
+      setLoading('btn-signup', true, 'Création…');
+      const { data, error } = await sb.auth.signUp({ email, password: pw });
+      setLoading('btn-signup', false, 'Créer mon compte →');
+      if (error) { showMsg('auth-msg', error.message, 'error'); return; }
+      if (data.session) { user = data.user; launchApp(); }
+      else showMsg('auth-msg', '✓ Compte créé ! Vérifiez votre email.', 'success');
+    }
 
-async function logout(){
-  await sb.auth.signOut(); user=null; newsletters=[]; subscribers=[];
-  showPage('auth-page');
-}
+    async function logout() {
+      await sb.auth.signOut(); user = null; newsletters = []; subscribers = [];
+      showPage('auth-page');
+    }
 
-// ── APP ──
-function launchApp(){
-  const initial = user.email.charAt(0).toUpperCase();
-  document.getElementById('sidebar-avatar').textContent = initial;
-  document.getElementById('sidebar-email').textContent  = user.email;
-  showPage('app-page');
-  loadAll();
-}
+    // ── APP ──
+    function launchApp() {
+      const initial = user.email.charAt(0).toUpperCase();
+      document.getElementById('sidebar-avatar').textContent = initial;
+      document.getElementById('sidebar-email').textContent = user.email;
+      showPage('app-page');
+      loadAll();
+    }
 
-async function loadAll(){
-  await Promise.all([loadNewsletters(), loadSubscribers()]);
-  renderDashboard();
-  renderNewsletters();
-  renderSubscribers();
-  renderCalendar();
-}
+    async function loadAll() {
+      await Promise.all([loadNewsletters(), loadSubscribers()]);
+      renderDashboard();
+      renderNewsletters();
+      renderSubscribers();
+      renderCalendar();
+    }
 
-// ── NEWSLETTERS CRUD ──
-async function loadNewsletters(){
-  const {data,error} = await sb.from('newsletters').select('*').order('created_at',{ascending:false});
-  if(!error) newsletters = data||[];
-}
+    // ── NEWSLETTERS CRUD ──
+    async function loadNewsletters() {
+      const { data, error } = await sb.from('newsletters').select('*').order('created_at', { ascending: false });
+      if (!error) newsletters = data || [];
+    }
 
-async function saveNewsletter(){
-  const title   = document.getElementById('nl-title-input').value.trim();
-  const content = document.getElementById('nl-content-input').value.trim();
-  const status  = document.getElementById('nl-status-input').value;
-  const sched   = document.getElementById('nl-scheduled-input').value;
-  if(!title){ showMsg('nl-msg','Le titre est requis.','error'); return; }
+    async function saveNewsletter() {
+      const title = document.getElementById('nl-title-input').value.trim();
+      const content = document.getElementById('nl-content-input').value.trim();
+      const status = document.getElementById('nl-status-input').value;
+      const sched = document.getElementById('nl-scheduled-input').value;
+      if (!title) { showMsg('nl-msg', 'Le titre est requis.', 'error'); return; }
 
-  setLoading('btn-save-nl', true, 'Enregistrement…');
-  const payload = {title, content, status, user_id: user.id,
-    scheduled_at: status==='scheduled' && sched ? new Date(sched).toISOString() : null,
-    sent_at: status==='sent' ? new Date().toISOString() : null
-  };
+      setLoading('btn-save-nl', true, 'Enregistrement…');
+      const payload = {
+        title, content, status, user_id: user.id,
+        scheduled_at: status === 'scheduled' && sched ? new Date(sched).toISOString() : null,
+        sent_at: status === 'sent' ? new Date().toISOString() : null
+      };
 
-  let error;
-  if(currentNlId){
-    ({error} = await sb.from('newsletters').update(payload).eq('id', currentNlId));
-  } else {
-    const {data, error:e} = await sb.from('newsletters').insert(payload).select().single();
-    error = e;
-    if(!e) newsletters.unshift(data);
-  }
-  setLoading('btn-save-nl', false, 'Enregistrer');
-  if(error){ showMsg('nl-msg', error.message,'error'); return; }
+      let error;
+      if (currentNlId) {
+        ({ error } = await sb.from('newsletters').update(payload).eq('id', currentNlId));
+      } else {
+        const { data, error: e } = await sb.from('newsletters').insert(payload).select().single();
+        error = e;
+        if (!e) newsletters.unshift(data);
+      }
+      setLoading('btn-save-nl', false, 'Enregistrer');
+      if (error) { showMsg('nl-msg', error.message, 'error'); return; }
 
-  if(currentNlId){
-    const idx = newsletters.findIndex(n=>n.id===currentNlId);
-    if(idx>=0) newsletters[idx] = {...newsletters[idx], ...payload};
-  }
-  closeModal('editor-modal');
-  renderDashboard(); renderNewsletters(); renderCalendar();
-}
+      if (currentNlId) {
+        const idx = newsletters.findIndex(n => n.id === currentNlId);
+        if (idx >= 0) newsletters[idx] = { ...newsletters[idx], ...payload };
+      }
+      closeModal('editor-modal');
+      renderDashboard(); renderNewsletters(); renderCalendar();
+    }
 
-async function deleteNewsletter(id){
-  if(!confirm('Supprimer cette newsletter ?')) return;
-  const {error} = await sb.from('newsletters').delete().eq('id',id);
-  if(!error){ newsletters=newsletters.filter(n=>n.id!==id); renderDashboard(); renderNewsletters(); renderCalendar(); }
-}
+    async function deleteNewsletter(id) {
+      if (!confirm('Supprimer cette newsletter ?')) return;
+      const { error } = await sb.from('newsletters').delete().eq('id', id);
+      if (!error) { newsletters = newsletters.filter(n => n.id !== id); renderDashboard(); renderNewsletters(); renderCalendar(); }
+    }
 
-// ── SUBSCRIBERS CRUD ──
-async function loadSubscribers(){
-  const {data,error} = await sb.from('subscribers').select('*').order('created_at',{ascending:false});
-  if(!error) subscribers = data||[];
-}
+    // ── SUBSCRIBERS CRUD ──
+    async function loadSubscribers() {
+      const { data, error } = await sb.from('subscribers').select('*').order('created_at', { ascending: false });
+      if (!error) subscribers = data || [];
+    }
 
-async function addSubscriber(){
-  const email  = document.getElementById('sub-email-input').value.trim();
-  const name   = document.getElementById('sub-name-input').value.trim();
-  const source = document.getElementById('sub-source-input').value;
-  if(!email){ showMsg('sub-msg','Email requis.','error'); return; }
+    async function addSubscriber() {
+      const email = document.getElementById('sub-email-input').value.trim();
+      const name = document.getElementById('sub-name-input').value.trim();
+      const source = document.getElementById('sub-source-input').value;
+      if (!email) { showMsg('sub-msg', 'Email requis.', 'error'); return; }
 
-  setLoading('btn-save-sub', true, 'Ajout…');
-  const {data,error} = await sb.from('subscribers').insert({email,name,source,user_id:user.id}).select().single();
-  setLoading('btn-save-sub', false, 'Ajouter');
-  if(error){ showMsg('sub-msg', error.message==='duplicate key value violates unique constraint "subscribers_email_key"' ? 'Cet email existe déjà.' : error.message,'error'); return; }
-  subscribers.unshift(data);
-  closeModal('sub-modal');
-  renderDashboard(); renderSubscribers();
-}
+      setLoading('btn-save-sub', true, 'Ajout…');
+      const { data, error } = await sb.from('subscribers').insert({ email, name, source, user_id: user.id }).select().single();
+      setLoading('btn-save-sub', false, 'Ajouter');
+      if (error) { showMsg('sub-msg', error.message === 'duplicate key value violates unique constraint "subscribers_email_key"' ? 'Cet email existe déjà.' : error.message, 'error'); return; }
+      subscribers.unshift(data);
+      closeModal('sub-modal');
+      renderDashboard(); renderSubscribers();
+    }
 
-async function deleteSubscriber(id){
-  if(!confirm('Retirer cet abonné ?')) return;
-  const {error} = await sb.from('subscribers').delete().eq('id',id);
-  if(!error){ subscribers=subscribers.filter(s=>s.id!==id); renderDashboard(); renderSubscribers(); }
-}
+    async function deleteSubscriber(id) {
+      if (!confirm('Retirer cet abonné ?')) return;
+      const { error } = await sb.from('subscribers').delete().eq('id', id);
+      if (!error) { subscribers = subscribers.filter(s => s.id !== id); renderDashboard(); renderSubscribers(); }
+    }
 
-// ── RENDER ──
-function renderDashboard(){
-  const sent  = newsletters.filter(n=>n.status==='sent').length;
-  const draft = newsletters.filter(n=>n.status==='draft').length;
-  document.getElementById('stat-subs').textContent = subscribers.filter(s=>s.active).length;
-  document.getElementById('stat-nl').textContent   = newsletters.length;
-  document.getElementById('stat-sent').textContent  = sent;
-  document.getElementById('stat-draft').textContent = draft;
+    // ── RENDER ──
+    function renderDashboard() {
+      const sent = newsletters.filter(n => n.status === 'sent').length;
+      const draft = newsletters.filter(n => n.status === 'draft').length;
+      document.getElementById('stat-subs').textContent = subscribers.filter(s => s.active).length;
+      document.getElementById('stat-nl').textContent = newsletters.length;
+      document.getElementById('stat-sent').textContent = sent;
+      document.getElementById('stat-draft').textContent = draft;
 
-  const recent = newsletters.slice(0,5);
-  const el = document.getElementById('dash-nl-list');
-  if(!recent.length){ el.innerHTML='<div class="empty"><div class="empty-icon">✉</div><p>Aucune newsletter encore.</p><button class="btn btn-primary btn-sm" onclick="openNewsletter()">Créer la première</button></div>'; return; }
-  el.innerHTML = nlTableHTML(recent);
-}
+      const recent = newsletters.slice(0, 5);
+      const el = document.getElementById('dash-nl-list');
+      if (!recent.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">✉</div><p>Aucune newsletter encore.</p><button class="btn btn-primary btn-sm" onclick="openNewsletter()">Créer la première</button></div>'; return; }
+      el.innerHTML = nlTableHTML(recent);
+    }
 
-function renderNewsletters(){
-  const el = document.getElementById('nl-list');
-  if(!newsletters.length){ el.innerHTML='<div class="empty"><div class="empty-icon">✉</div><p>Aucune newsletter.</p><button class="btn btn-primary btn-sm" onclick="openNewsletter()">Créer</button></div>'; return; }
-  el.innerHTML = nlTableHTML(newsletters);
-}
+    function renderNewsletters() {
+      const el = document.getElementById('nl-list');
+      if (!newsletters.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">✉</div><p>Aucune newsletter.</p><button class="btn btn-primary btn-sm" onclick="openNewsletter()">Créer</button></div>'; return; }
+      el.innerHTML = nlTableHTML(newsletters);
+    }
 
-function nlTableHTML(items){
-  return `<div class="nl-table">
+    function nlTableHTML(items) {
+      return `<div class="nl-table">
     <div class="nl-table-head"><div>Titre</div><div>Statut</div><div>Abonnés</div><div>Date</div><div></div></div>
-    ${items.map((n,i)=>`
-    <div class="nl-row" style="animation-delay:${i*.04}s">
-      <div><div class="nl-title">${esc(n.title)}</div><div class="nl-sub">${n.content ? n.content.substring(0,60)+'…' : 'Pas de contenu'}</div></div>
+    ${items.map((n, i) => `
+    <div class="nl-row" style="animation-delay:${i * .04}s">
+      <div><div class="nl-title">${esc(n.title)}</div><div class="nl-sub">${n.content ? n.content.substring(0, 60) + '…' : 'Pas de contenu'}</div></div>
       <div><span class="status-chip ${n.status}">${statusLabel(n.status)}</span></div>
-      <div style="font-size:.82rem;color:var(--muted)">${subscribers.filter(s=>s.active).length}</div>
-      <div style="font-size:.78rem;color:var(--muted)">${fmtDate(n.scheduled_at||n.created_at)}</div>
+      <div style="font-size:.82rem;color:var(--muted)">${subscribers.filter(s => s.active).length}</div>
+      <div style="font-size:.78rem;color:var(--muted)">${fmtDate(n.scheduled_at || n.created_at)}</div>
       <div class="nl-actions">
         <button class="btn btn-outline btn-sm" onclick="editNewsletter('${n.id}')">Éditer</button>
         <button class="btn btn-danger btn-sm" onclick="deleteNewsletter('${n.id}')">✕</button>
       </div>
     </div>`).join('')}
   </div>`;
-}
+    }
 
-function renderSubscribers(){
-  const el = document.getElementById('sub-list');
-  if(!subscribers.length){ el.innerHTML='<div class="empty"><div class="empty-icon">◎</div><p>Aucun abonné.</p><button class="btn btn-primary btn-sm" onclick="openAddSubscriber()">Ajouter</button></div>'; return; }
-  el.innerHTML = `<div class="sub-table">
+    function renderSubscribers() {
+      const el = document.getElementById('sub-list');
+      if (!subscribers.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">◎</div><p>Aucun abonné.</p><button class="btn btn-primary btn-sm" onclick="openAddSubscriber()">Ajouter</button></div>'; return; }
+      el.innerHTML = `<div class="sub-table">
     <div class="sub-head"><div>Email</div><div>Nom</div><div>Source</div><div></div></div>
-    ${subscribers.map((s,i)=>`
-    <div class="sub-row" style="animation-delay:${i*.03}s">
+    ${subscribers.map((s, i) => `
+    <div class="sub-row" style="animation-delay:${i * .03}s">
       <div class="sub-email"><span class="active-dot"></span>${esc(s.email)}</div>
-      <div style="font-size:.82rem">${esc(s.name||'—')}</div>
+      <div style="font-size:.82rem">${esc(s.name || '—')}</div>
       <div class="sub-source">${s.source}</div>
       <div><button class="btn btn-danger btn-sm" onclick="deleteSubscriber('${s.id}')">✕</button></div>
     </div>`).join('')}
   </div>`;
-}
+    }
 
-function renderCalendar(){
-  const now   = new Date();
-  const first = new Date(calYear, calMonth, 1);
-  const last  = new Date(calYear, calMonth+1, 0);
-  const months= ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  document.getElementById('cal-month-title').textContent = `${months[calMonth]} ${calYear}`;
+    function renderCalendar() {
+      const now = new Date();
+      const first = new Date(calYear, calMonth, 1);
+      const last = new Date(calYear, calMonth + 1, 0);
+      const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+      document.getElementById('cal-month-title').textContent = `${months[calMonth]} ${calYear}`;
 
-  let startDay = first.getDay(); // 0=dim
-  startDay = startDay===0 ? 6 : startDay-1; // monday first
+      let startDay = first.getDay(); // 0=dim
+      startDay = startDay === 0 ? 6 : startDay - 1; // monday first
 
-  let cells = '';
-  for(let i=0;i<startDay;i++) cells += '<div></div>';
-  for(let d=1;d<=last.getDate();d++){
-    const date     = new Date(calYear, calMonth, d);
-    const isToday  = date.toDateString()===now.toDateString();
-    const dayNLs   = newsletters.filter(n=>{
-      const nd = n.scheduled_at ? new Date(n.scheduled_at) : new Date(n.created_at);
-      return nd.getFullYear()===calYear && nd.getMonth()===calMonth && nd.getDate()===d;
-    });
-    cells += `<div class="cal-cell ${isToday?'today':''}">
+      let cells = '';
+      for (let i = 0; i < startDay; i++) cells += '<div></div>';
+      for (let d = 1; d <= last.getDate(); d++) {
+        const date = new Date(calYear, calMonth, d);
+        const isToday = date.toDateString() === now.toDateString();
+        const dayNLs = newsletters.filter(n => {
+          const nd = n.scheduled_at ? new Date(n.scheduled_at) : new Date(n.created_at);
+          return nd.getFullYear() === calYear && nd.getMonth() === calMonth && nd.getDate() === d;
+        });
+        cells += `<div class="cal-cell ${isToday ? 'today' : ''}">
       <div class="cal-date">${d}</div>
-      ${dayNLs.map(n=>`<div class="cal-event ${n.status}" title="${esc(n.title)}">${esc(n.title)}</div>`).join('')}
+      ${dayNLs.map(n => `<div class="cal-event ${n.status}" title="${esc(n.title)}">${esc(n.title)}</div>`).join('')}
     </div>`;
-  }
-  document.getElementById('calendar-grid').innerHTML = cells;
-}
+      }
+      document.getElementById('calendar-grid').innerHTML = cells;
+    }
 
-function changeMonth(dir){
-  calMonth += dir;
-  if(calMonth>11){ calMonth=0; calYear++; }
-  if(calMonth<0){ calMonth=11; calYear--; }
-  renderCalendar();
-}
+    function changeMonth(dir) {
+      calMonth += dir;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendar();
+    }
 
-// ── MODALS ──
-function openNewsletter(){
-  currentNlId = null;
-  document.getElementById('nl-title-input').value='';
-  document.getElementById('nl-content-input').value='';
-  document.getElementById('nl-status-input').value='draft';
-  document.getElementById('nl-scheduled-input').value='';
-  document.getElementById('scheduled-date-group').style.display='none';
-  document.getElementById('editor-modal-title').textContent='Nouvelle newsletter';
-  hideMsg('nl-msg');
-  show('editor-modal');
-}
+    // ── MODALS ──
+    function openNewsletter() {
+      currentNlId = null;
+      document.getElementById('nl-title-input').value = '';
+      document.getElementById('nl-content-input').value = '';
+      document.getElementById('nl-status-input').value = 'draft';
+      document.getElementById('nl-scheduled-input').value = '';
+      document.getElementById('scheduled-date-group').style.display = 'none';
+      document.getElementById('editor-modal-title').textContent = 'Nouvelle newsletter';
+      hideMsg('nl-msg');
+      show('editor-modal');
+    }
 
-function editNewsletter(id){
-  const n = newsletters.find(x=>x.id===id); if(!n) return;
-  currentNlId = id;
-  document.getElementById('nl-title-input').value   = n.title||'';
-  document.getElementById('nl-content-input').value = n.content||'';
-  document.getElementById('nl-status-input').value  = n.status||'draft';
-  if(n.scheduled_at){
-    const dt = new Date(n.scheduled_at);
-    document.getElementById('nl-scheduled-input').value = dt.toISOString().slice(0,16);
-  }
-  document.getElementById('scheduled-date-group').style.display = n.status==='scheduled' ? 'block' : 'none';
-  document.getElementById('editor-modal-title').textContent='Modifier la newsletter';
-  hideMsg('nl-msg');
-  show('editor-modal');
-}
+    function editNewsletter(id) {
+      const n = newsletters.find(x => x.id === id); if (!n) return;
+      currentNlId = id;
+      document.getElementById('nl-title-input').value = n.title || '';
+      document.getElementById('nl-content-input').value = n.content || '';
+      document.getElementById('nl-status-input').value = n.status || 'draft';
+      if (n.scheduled_at) {
+        const dt = new Date(n.scheduled_at);
+        document.getElementById('nl-scheduled-input').value = dt.toISOString().slice(0, 16);
+      }
+      document.getElementById('scheduled-date-group').style.display = n.status === 'scheduled' ? 'block' : 'none';
+      document.getElementById('editor-modal-title').textContent = 'Modifier la newsletter';
+      hideMsg('nl-msg');
+      show('editor-modal');
+    }
 
-function openAddSubscriber(){
-  document.getElementById('sub-email-input').value='';
-  document.getElementById('sub-name-input').value='';
-  document.getElementById('sub-source-input').value='manual';
-  hideMsg('sub-msg');
-  show('sub-modal');
-}
+    function openAddSubscriber() {
+      document.getElementById('sub-email-input').value = '';
+      document.getElementById('sub-name-input').value = '';
+      document.getElementById('sub-source-input').value = 'manual';
+      hideMsg('sub-msg');
+      show('sub-modal');
+    }
 
-function closeModal(id){ document.getElementById(id).style.display='none'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-// ── VIEWS ──
-function showView(view, el){
-  ['dashboard','newsletters','calendar','subscribers'].forEach(v=>{
-    document.getElementById('view-'+v).style.display = v===view ? 'block' : 'none';
-  });
-  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-  if(el) el.classList.add('active');
-  else {
-    document.querySelectorAll('.nav-item').forEach(i=>{
-      if(i.getAttribute('onclick')&&i.getAttribute('onclick').includes("'"+view+"'")) i.classList.add('active');
-    });
-  }
-  const titles={dashboard:'Dashboard',newsletters:'Newsletters',calendar:'Calendrier éditorial',subscribers:'Abonnés'};
-  document.getElementById('topbar-title').textContent = titles[view]||view;
-}
+    // ── VIEWS ──
+    function showView(view, el) {
+      ['dashboard', 'newsletters', 'calendar', 'subscribers'].forEach(v => {
+        document.getElementById('view-' + v).style.display = v === view ? 'block' : 'none';
+      });
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      if (el) el.classList.add('active');
+      else {
+        document.querySelectorAll('.nav-item').forEach(i => {
+          if (i.getAttribute('onclick') && i.getAttribute('onclick').includes("'" + view + "'")) i.classList.add('active');
+        });
+      }
+      const titles = { dashboard: 'Dashboard', newsletters: 'Newsletters', calendar: 'Calendrier éditorial', subscribers: 'Abonnés' };
+      document.getElementById('topbar-title').textContent = titles[view] || view;
+    }
 
-// ── UTILS ──
-function show(id){ document.getElementById(id).style.display='flex'; }
-function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function showMsg(id,txt,type){ const el=document.getElementById(id); el.textContent=txt; el.className=`msg ${type} show`; }
-function hideMsg(id){ document.getElementById(id).className='msg'; }
-function setLoading(id,loading,txt){ const b=document.getElementById(id); b.disabled=loading; b.textContent=txt; }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmtDate(iso){ return iso ? new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
-function statusLabel(s){ return {draft:'Brouillon',scheduled:'Planifiée',sent:'Envoyée'}[s]||s; }
-</script>
+    // ── UTILS ──
+    function show(id) { document.getElementById(id).style.display = 'flex'; }
+    function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function showMsg(id, txt, type) { const el = document.getElementById(id); el.textContent = txt; el.className = `msg ${type} show`; }
+    function hideMsg(id) { document.getElementById(id).className = 'msg'; }
+    function setLoading(id, loading, txt) { const b = document.getElementById(id); b.disabled = loading; b.textContent = txt; }
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function fmtDate(iso) { return iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; }
+    function statusLabel(s) { return { draft: 'Brouillon', scheduled: 'Planifiée', sent: 'Envoyée' }[s] || s; }
+  </script>
 </body>
+
 </html>
